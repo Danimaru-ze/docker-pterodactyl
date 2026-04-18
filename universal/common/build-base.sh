@@ -88,7 +88,7 @@ apt-get update \
   && rm -rf /var/lib/apt/lists/*
 
 mkdir -p /etc/apt/keyrings \
-  && curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg \
+  && curl -fsSL --retry 5 --retry-delay 5 https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg \
   && echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_${NODE_MAJOR}.x nodistro main" > /etc/apt/sources.list.d/nodesource.list \
   && apt-get update \
   && apt-get install -y --no-install-recommends nodejs \
@@ -102,38 +102,38 @@ case "$ARCH" in
   *) echo "Unsupported architecture: $ARCH"; exit 1 ;;
 esac
 
-curl -fsSL "https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-${CF_ARCH}" -o /usr/local/bin/cloudflared \
+curl -fsSL --retry 5 --retry-delay 5 "https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-${CF_ARCH}" -o /usr/local/bin/cloudflared \
   && chmod +x /usr/local/bin/cloudflared
 
 if [ "$ARCH" = "amd64" ]; then
   mkdir -p /etc/apt/keyrings \
-    && curl -fsSL https://dl.google.com/linux/linux_signing_key.pub | gpg --dearmor -o /etc/apt/keyrings/google-linux.gpg \
+    && curl -fsSL --retry 5 --retry-delay 5 https://dl.google.com/linux/linux_signing_key.pub | gpg --dearmor -o /etc/apt/keyrings/google-linux.gpg \
     && echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/google-linux.gpg] http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome.list \
     && apt-get update \
     && apt-get install -y --no-install-recommends google-chrome-stable \
     && rm -rf /var/lib/apt/lists/*
 fi
 
-curl -fsSL https://go.dev/VERSION?m=text -o /tmp/go.version \
+curl -fsSL --retry 5 --retry-delay 5 https://go.dev/VERSION?m=text -o /tmp/go.version \
   && GO_VERSION="$(sed -n '1p' /tmp/go.version)" \
   && case "$ARCH" in \
       amd64) GO_ARCH='amd64' ;; \
       arm64) GO_ARCH='arm64' ;; \
       *) echo "Unsupported architecture: $ARCH"; exit 1 ;; \
     esac \
-  && curl -fsSL "https://go.dev/dl/${GO_VERSION}.linux-${GO_ARCH}.tar.gz" -o /tmp/go.tgz \
+  && curl -fsSL --retry 5 --retry-delay 5 "https://go.dev/dl/${GO_VERSION}.linux-${GO_ARCH}.tar.gz" -o /tmp/go.tgz \
   && rm -rf /usr/local/go \
   && tar -C /usr/local -xzf /tmp/go.tgz \
   && ln -sf /usr/local/go/bin/go /usr/local/bin/go \
   && ln -sf /usr/local/go/bin/gofmt /usr/local/bin/gofmt \
   && rm -f /tmp/go.tgz /tmp/go.version
 
-curl -LsSf https://astral.sh/uv/install.sh | env UV_INSTALL_DIR=/opt/uv sh \
+curl -LsSf --retry 5 --retry-delay 5 https://astral.sh/uv/install.sh | env UV_INSTALL_DIR=/opt/uv sh \
   && ln -sf /opt/uv/uv /usr/local/bin/uv \
   && ln -sf /opt/uv/uvx /usr/local/bin/uvx \
   && uv python install 3.13
 
-curl -fsSL https://bun.sh/install | env BUN_INSTALL=/opt/bun bash \
+curl -fsSL --retry 5 --retry-delay 5 https://bun.sh/install | env BUN_INSTALL=/opt/bun bash \
   && ln -sf /opt/bun/bin/bun /usr/local/bin/bun \
   && ln -sf /opt/bun/bin/bunx /usr/local/bin/bunx
 
@@ -143,12 +143,12 @@ case "$ARCH" in
   *) echo "Unsupported architecture: $ARCH"; exit 1 ;;
 esac
 
-curl -fsSL "https://github.com/denoland/deno/releases/latest/download/deno-${DENO_TARGET}.zip" -o /tmp/deno.zip \
+curl -fsSL --retry 5 --retry-delay 5 "https://github.com/denoland/deno/releases/latest/download/deno-${DENO_TARGET}.zip" -o /tmp/deno.zip \
   && unzip -o /tmp/deno.zip -d /usr/local/bin \
   && chmod +x /usr/local/bin/deno \
   && rm -f /tmp/deno.zip
 
-curl --proto '=https' --tlsv1.2 -fsSL https://sh.rustup.rs | sh -s -- -y --profile default --no-modify-path \
+curl --proto '=https' --tlsv1.2 -fsSL --retry 5 --retry-delay 5 https://sh.rustup.rs | sh -s -- -y --profile default --no-modify-path \
   && mv /root/.cargo /opt/cargo \
   && mv /root/.rustup /opt/rustup \
   && ln -sf /opt/cargo/bin/cargo /usr/local/bin/cargo \
@@ -163,7 +163,7 @@ case "$ARCH" in
 esac
 
 if [ -n "$FF_ARCH" ]; then
-  FF_URL="$(curl -fsSL https://api.github.com/repos/fastfetch-cli/fastfetch/releases/latest | jq -r --arg arch "$FF_ARCH" '[.assets[] | select(.name | endswith($arch + ".deb")) | .browser_download_url][0] // empty')"
+  FF_URL="$(curl -fsSL --retry 5 --retry-delay 5 https://api.github.com/repos/fastfetch-cli/fastfetch/releases/latest | jq -r --arg arch "$FF_ARCH" '[.assets[] | select(.name | endswith($arch + ".deb")) | .browser_download_url][0] // empty')"
   if [ -n "$FF_URL" ]; then
     curl -fsSL "$FF_URL" -o /tmp/fastfetch.deb \
       && apt-get update \
