@@ -42,6 +42,10 @@ fi
 
 STARTUP=${STARTUP:-/bin/bash -li}
 
+if [ -x /usr/local/bin/astrahost-banner ]; then
+    /usr/local/bin/astrahost-banner
+fi
+
 printf "\033[1m\033[33m%s@astrahost~ \033[0m%s\n" "$(whoami)" "$STARTUP"
 
 exec /bin/bash -lc "$STARTUP"
