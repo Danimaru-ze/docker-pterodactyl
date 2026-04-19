@@ -32,8 +32,11 @@ USER container
 ENV USER=container HOME=/home/container
 WORKDIR /home/container
 
-COPY --chown=container:container ../entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
+COPY --chown=container:container ./universal/common/entrypoint.sh /entrypoint.sh
+COPY --chown=container:container ./universal/common/astrahost-banner.sh /usr/local/bin/astrahost-banner
+COPY --chown=container:container ./universal/common/astrahost-shell.sh /etc/profile.d/astrahost-shell.sh
 
 ENTRYPOINT ["/usr/bin/tini", "-g", "--"]
 CMD ["/entrypoint.sh"]
+
+

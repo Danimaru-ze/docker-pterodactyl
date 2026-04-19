@@ -12,15 +12,18 @@ echo -e "${BLUE}=======================================${NC}"
 echo -e "${GREEN}      ASTRAHOST - SULTAN BUILD         ${NC}"
 echo -e "${BLUE}=======================================${NC}"
 
-# 1. Build Node.js Images (18-25)
-echo -e "${YELLOW}Building ALL Node.js images (18 to 25)...${NC}"
-for version in 18 19 20 21 22 23 24 25; do
+# Aktifkan BuildKit untuk kecepatan Sultan
+export DOCKER_BUILDKIT=1
+
+# 1. Build Node.js LTS (Hanya versi stabil yang dibutuhkan)
+echo -e "${YELLOW}Building Node.js LTS versions (18, 20, 22, 24)...${NC}"
+for version in 18 20 22 24; do
     echo -e "--- Building node_$version ---"
     docker build -t astrahost:node_$version -f nodejs/$version/Dockerfile .
 done
 
-# 2. Build Universal Ubuntu 24 (The Overpower One)
-echo -e "${YELLOW}Building Universal Ubuntu 24 (Ini akan memakan waktu)...${NC}"
+# 2. Build Universal Ubuntu 24
+echo -e "${YELLOW}Building Universal Ubuntu 24...${NC}"
 docker build -t astrahost:ubuntu24_universal -f universal/ubuntu/24.04/Dockerfile .
 
 echo -e "${BLUE}=======================================${NC}"

@@ -1,0 +1,115 @@
+{
+    "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": null
+    },
+    "name": "Astra WhatsApp Bot",
+    "author": "danysetiyawan50@gmail.com",
+    "description": "Egg WhatsApp Bot dengan multi Node version + XVFB + Auto Update",
+    "features": [],
+    "docker_images": {
+        "Node.js 20 (Recommended for WA Bot)": "astrahost:node_20",
+        "Ubuntu 24.04 (Universal Image)": "astrahost:ubuntu24_universal",
+        "Node.js 24 (Stable)": "astrahost:node_24",
+        "Node.js 22 (LTS)": "astrahost:node_22",
+        "Node.js 18 (LTS)": "astrahost:node_18"
+    },
+    "file_denylist": [],
+    "startup": "if [ -f package.json ]; then if [ ! -d node_modules ] || [ package.json -nt node_modules ]; then echo \"[DEPENDENCY CHECK] Dependencies not found or outdated\"; echo \"[INSTALL] Installing dependencies...\"; npm install --production; echo -e \"[INSTALL] Dependencies installed successfully!\\n\"; fi; fi; if [ \"$AUTO_UPDATE\" = \"1\" ] && [ -d .git ]; then echo -e \"[AUTO-UPDATE] Checking for updates...\"; git pull && if [ -f package.json ]; then echo \"[AUTO-UPDATE] Installing updated dependencies...\"; npm install --production; fi; echo -e \"[AUTO-UPDATE] Update complete!\\n\"; fi; echo \"[STARTUP] Starting App...\"; echo \"\"; exec ${STARTUP_CMD:-npm start}",
+    "config": {
+        "files": "{}",
+        "startup": "{\"done\": [\"Server started\", \"Bot is ready\", \"Connected\", \"QR\", \"listening\"]}",
+        "logs": "{}",
+        "stop": "^C"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!/bin/bash\n\ncd /mnt/server || exit 1\n\necho \"[INFO] Starting installation...\"\n\nif [ \"${USER_UPLOAD}\" != \"true\" ]; then\n    if [ -z \"${GIT_ADDRESS}\" ]; then\n        echo \"[INFO] GIT_ADDRESS kosong, melewati proses clone...\"\n    else\n        echo \"[INFO] Cloning repository...\"\n        if [ ! -z \"${USERNAME}\" ] && [ ! -z \"${ACCESS_TOKEN}\" ]; then\n            git clone https://${USERNAME}:${ACCESS_TOKEN}@${GIT_ADDRESS#https://} .\n        else\n            git clone ${GIT_ADDRESS} .\n        fi\n    fi\nfi\n\nif [ -f package.json ]; then\n    echo \"[INFO] Installing dependencies...\"\n    npm install --production\nfi\n\necho \"[INFO] Installation completed\"\nexit 0",
+            "container": "node:20-bookworm-slim",
+            "entrypoint": "bash"
+        }
+    },
+    "variables": [
+        {
+            "name": "Git Repository URL",
+            "description": "URL repository Git",
+            "env_variable": "GIT_ADDRESS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Git Username",
+            "description": "Username Git (opsional)",
+            "env_variable": "USERNAME",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Git Access Token",
+            "description": "Token Git (opsional)",
+            "env_variable": "ACCESS_TOKEN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Startup Command",
+            "description": "Contoh: npm start",
+            "env_variable": "STARTUP_CMD",
+            "default_value": "npm start",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Extra Node Packages",
+            "description": "Contoh: ffmpeg-static sharp",
+            "env_variable": "NODE_PACKAGES",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Enable XVFB",
+            "description": "1 = aktif, 0 = nonaktif",
+            "env_variable": "XVFB_ENABLE",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|in:0,1",
+            "field_type": "text"
+        },
+        {
+            "name": "Auto Update",
+            "description": "1 = aktif, 0 = nonaktif",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|in:0,1",
+            "field_type": "text"
+        },
+        {
+            "name": "User Upload Mode",
+            "description": "true = upload manual, false = clone git",
+            "env_variable": "USER_UPLOAD",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|in:true,false",
+            "field_type": "text"
+        }
+    ]
+}
