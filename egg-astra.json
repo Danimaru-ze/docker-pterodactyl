@@ -16,7 +16,7 @@
         "Node.js 18 (LTS)": "astrahost:node_18"
     },
     "file_denylist": [],
-    "startup": "@astrahost~ if [ -f package.json ] || [ -n \"${STARTUP_CMD}\" ]; then exec ${STARTUP_CMD:-npm start}; else /bin/bash; fi",
+    "startup": "if [ -f package.json ] || [ -n \"${STARTUP_CMD}\" ]; then exec ${STARTUP_CMD:-npm start}; else /bin/bash; fi",
     "config": {
         "files": "{}",
         "startup": "{\"done\": [\"Server started\", \"Bot is ready\", \"Connected\", \"QR\", \"listening\"]}",
