@@ -27,8 +27,7 @@ ENV PATH="/home/container/.local/bin:/opt/uv:/opt/bun/bin:/opt/cargo/bin:/usr/lo
 COPY --chown=container:container ./universal/common/entrypoint.sh /entrypoint.sh
 COPY --chown=container:container ./universal/common/astrahost-banner.sh /usr/local/bin/astrahost-banner
 COPY --chown=container:container ./universal/common/astrahost-shell.sh /etc/profile.d/astrahost-shell.sh
-RUN chmod +x /entrypoint.sh /usr/local/bin/astrahost-banner /etc/profile.d/astrahost-shell.sh
-
+RUN chmod +x /entrypoint.sh /usr/local/bin/astrahost-banner /etc/profile.d/astrahost-shell.sh \
     && mkdir -p /ms-playwright \
     && chown -R container:container /ms-playwright /opt/bun /opt/cargo /opt/rustup /opt/uv
 
@@ -38,6 +37,8 @@ WORKDIR /home/container
 
 ENTRYPOINT ["/usr/bin/tini", "-g", "--"]
 CMD ["/entrypoint.sh"]
+
+
 
 
 
