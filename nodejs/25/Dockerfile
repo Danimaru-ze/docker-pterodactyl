@@ -76,7 +76,7 @@ USER container
 ENV USER=container HOME=/home/container
 WORKDIR /home/container
 
-COPY --chown=container:container ../entrypoint.sh /entrypoint.sh
+COPY --chown=container:container ./universal/common/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
 ENTRYPOINT ["/usr/bin/tini", "-g", "--"]
