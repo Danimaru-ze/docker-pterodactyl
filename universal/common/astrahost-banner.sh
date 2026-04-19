@@ -126,12 +126,22 @@ print_logo() {
     fi
 }
 
+# Deteksi OS secara dinamis
+if [ -f /etc/os-release ]; then
+    . /etc/os-release
+    os_name="${NAME:-Linux}"
+    os_vers="${VERSION:-}"
+else
+    os_name="Linux"
+    os_vers=""
+fi
+
 printf "\e[H\e[2J"
 print_logo
 printf "\n"
-printf "${cyan}%s${reset} for ${green}%s${reset} running ${cyan}Debian Linux %s${reset}\n" "Universal Environment" "$host_name" "$kernel"
+printf "${cyan}%s${reset} for ${green}%s${reset} running ${cyan}%s %s${reset}\n" "Universal Environment" "$host_name" "$os_name" "$kernel"
 printf "\n"
-printf "${white}Packages:${reset}  Debian stable (bookworm)\n"
+printf "${white}Packages:${reset}  %s\n" "$os_vers"
 if [ -n "$panel_port" ]; then
     printf "${white}IP address:${reset} ${mag}%s:%s${reset}\n" "$panel_ip" "$panel_port"
 else
