@@ -40,12 +40,30 @@ if [ "${XVFB_ENABLE:-false}" = "true" ] || [ "${XVFB_ENABLE:-0}" = "1" ]; then
     fi
 fi
 
+# --- AstraHost Smart Startup Logic ---
+if [ -f package.json ]; then
+    if [ ! -d node_modules ] || [ package.json -nt node_modules ]; then
+        echo -e "\n\e[1;36m[DEPENDENCY CHECK]\e[0m Dependencies not found or outdated."
+        echo -e "\e[1;32m[INSTALL]\e[0m Installing dependencies (npm install)..."
+        npm install --production
+        echo -e "\e[1;32m[INSTALL]\e[0m Dependencies installed successfully!\n"
+    fi
+fi
+
+if [[ "${AUTO_UPDATE:-0}" == "1" ]] && [[ -d .git ]]; then
+    echo -e "\e[1;36m[AUTO_UPDATE]\e[0m Checking for updates..."
+    git pull && echo -e "\e[1;32m[AUTO_UPDATE]\e[0m Installing updated dependencies..." && npm install --production
+    echo -e "\e[1;32m[AUTO_UPDATE]\e[0m Update complete!\n"
+fi
+# -------------------------------------
+
 STARTUP=${STARTUP:-/bin/bash -li}
 
 if [ -x /usr/local/bin/astrahost-banner ]; then
     /usr/local/bin/astrahost-banner
 fi
 
-printf "\033[1m\033[33m%s@astrahost~ \033[0m%s\n" "$(whoami)" "$STARTUP"
+printf "\033[1;35mASTRAHOST\033[0m \033[1;33mStarting WhatsApp Bot...\n\033[0m"
+printf "\033[1;32mCMD:\033[0m %s\n\n" "$STARTUP"
 
 exec /bin/bash -lc "$STARTUP"

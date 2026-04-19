@@ -16,7 +16,7 @@
         "Node.js 18 (LTS)": "astrahost:node_18"
     },
     "file_denylist": [],
-    "startup": "if [ -f package.json ]; then if [ ! -d node_modules ] || [ package.json -nt node_modules ]; then echo \"[DEPENDENCY CHECK] Dependencies not found or outdated\"; echo \"[INSTALL] Installing dependencies...\"; npm install --production; echo -e \"[INSTALL] Dependencies installed successfully!\\n\"; fi; fi; if [ \"$AUTO_UPDATE\" = \"1\" ] && [ -d .git ]; then echo -e \"[AUTO-UPDATE] Checking for updates...\"; git pull && if [ -f package.json ]; then echo \"[AUTO-UPDATE] Installing updated dependencies...\"; npm install --production; fi; echo -e \"[AUTO-UPDATE] Update complete!\\n\"; fi; echo \"[STARTUP] Starting App...\"; echo \"\"; exec ${STARTUP_CMD:-npm start}",
+    "startup": "@astrahost~ if [ -f package.json ] || [ -n \"${STARTUP_CMD}\" ]; then exec ${STARTUP_CMD:-npm start}; else /bin/bash; fi",
     "config": {
         "files": "{}",
         "startup": "{\"done\": [\"Server started\", \"Bot is ready\", \"Connected\", \"QR\", \"listening\"]}",
