@@ -25,9 +25,11 @@ else
     python3 -m pip install --user --no-cache-dir -U yt-dlp >/tmp/yt-dlp-install.log 2>&1 || true
 fi
 
+export COREPACK_ENABLE_DOWNLOAD_PROMPT=0
+
 if command -v pnpm >/dev/null 2>&1 && [ -f /home/container/package.json ]; then
-    pnpm config set --location project dangerouslyAllowAllBuilds true >/tmp/pnpm-approve.log 2>&1 || true
-    pnpm approve-builds --all >>/tmp/pnpm-approve.log 2>&1 || true
+    pnpm config set --location project dangerouslyAllowAllBuilds true >/tmp/pnpm-approve.log 2>&1 </dev/null || true
+    pnpm approve-builds --all >>/tmp/pnpm-approve.log 2>&1 </dev/null || true
 fi
 
 if [ "${XVFB_ENABLE:-false}" = "true" ] || [ "${XVFB_ENABLE:-0}" = "1" ]; then
@@ -66,4 +68,13 @@ fi
 printf "\033[1;35mASTRAHOST\033[0m \033[1;33mStarting WhatsApp Bot...\n\033[0m"
 printf "\033[1;32mCMD:\033[0m %s\n\n" "$STARTUP"
 
-exec /bin/bash -lc "$STARTUP"
+# --- AstraHost Fast-Kill Wrapper ---
+# Mencegah bot bandel (zombie process) menyangkut saat tombol Stop ditekan
+set -m
+/bin/bash -lc "$STARTUP" &
+MAIN_PID=$!
+
+trap "echo -e '\n\e[1;33m[ASTRAHOST]\e[0m Menerima perintah Stop. Menunggu bot mati dengan tenang (Max 5 detik)...'; kill -SIGINT -$MAIN_PID 2>/dev/null; for i in {1..5}; do kill -0 \$MAIN_PID 2>/dev/null || exit 0; sleep 1; done; echo -e '\e[1;31m[ASTRAHOST]\e[0m Memaksa mati (Force Kill) bot yang bandel...'; kill -9 -$MAIN_PID 2>/dev/null; exit 0" SIGINT SIGTERM
+
+wait $MAIN_PID
+exit $?
