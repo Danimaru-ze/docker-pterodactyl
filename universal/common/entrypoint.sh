@@ -61,6 +61,15 @@ fi
 
 STARTUP=${STARTUP:-/bin/bash -li}
 
+# --- AstraHost Startup Command Auto-Fixer ---
+# Jika mendeteksi command lama yang panjang atau mengandung error {{STARTUP_CMD}} dari panel,
+# kita akan otomatis me-replace-nya di dalam Docker tanpa perlu ubah config panel satu-satu.
+if [[ "$STARTUP" == *"{{STARTUP_CMD}}"* ]] || [[ "$STARTUP" == *"npm install"* && "$STARTUP" == *"AUTO_UPDATE"* ]]; then
+    echo -e "\e[1;33m[ASTRAHOST]\e[0m Mendeteksi Startup Command usang. Menerapkan Auto-Fix..."
+    STARTUP="if [ -f package.json ] || [ -n \"\${STARTUP_CMD}\" ]; then exec \${STARTUP_CMD:-npm start}; else /bin/bash; fi"
+fi
+# --------------------------------------------
+
 if [ -x /usr/local/bin/astrahost-banner ]; then
     /usr/local/bin/astrahost-banner
 fi
