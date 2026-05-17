@@ -47,14 +47,14 @@ if [ -f package.json ]; then
     if [ ! -d node_modules ] || [ package.json -nt node_modules ]; then
         echo -e "\n\e[1;36m[DEPENDENCY CHECK]\e[0m Dependencies not found or outdated."
         echo -e "\e[1;32m[INSTALL]\e[0m Installing dependencies (npm install)..."
-        npm install --production
+        npm install
         echo -e "\e[1;32m[INSTALL]\e[0m Dependencies installed successfully!\n"
     fi
 fi
 
 if [[ "${AUTO_UPDATE:-0}" == "1" ]] && [[ -d .git ]]; then
     echo -e "\e[1;36m[AUTO_UPDATE]\e[0m Checking for updates..."
-    git pull && echo -e "\e[1;32m[AUTO_UPDATE]\e[0m Installing updated dependencies..." && npm install --production
+    git pull && echo -e "\e[1;32m[AUTO_UPDATE]\e[0m Installing updated dependencies..." && npm install
     echo -e "\e[1;32m[AUTO_UPDATE]\e[0m Update complete!\n"
 fi
 # -------------------------------------
