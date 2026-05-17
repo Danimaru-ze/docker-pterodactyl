@@ -16,7 +16,7 @@ echo -e "${BLUE}=======================================${NC}"
 # Aktifkan BuildKit untuk kecepatan Sultan
 export DOCKER_BUILDKIT=1
 
-REGISTRY="${REGISTRY:-ghcr.io/danimaru-ze/docker-pterodactyl}"
+REGISTRY="${REGISTRY:-jagoanproject}"
 
 # 1. Build Node.js LTS
 echo -e "\n${YELLOW}[1/2] Building Node.js LTS versions (18, 20, 22, 24)...${NC}"

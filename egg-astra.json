@@ -9,11 +9,11 @@
     "description": "Egg universal untuk bot Node.js (WhatsApp, Discord, Telegram, dll). Support clone Git private/public, auto install dependencies, dan auto update.",
     "features": [],
     "docker_images": {
-        "Node.js 20 - Jagoan Project (Recommended)": "ghcr.io/danimaru-ze/docker-pterodactyl:node_20",
-        "Node.js 22 - Jagoan Project (LTS)": "ghcr.io/danimaru-ze/docker-pterodactyl:node_22",
-        "Node.js 18 - Jagoan Project": "ghcr.io/danimaru-ze/docker-pterodactyl:node_18",
-        "Node.js 24 - Jagoan Project": "ghcr.io/danimaru-ze/docker-pterodactyl:node_24",
-        "Debian 12 Universal - Jagoan Project": "ghcr.io/danimaru-ze/docker-pterodactyl:debian12_universal"
+        "Node.js 20 - Jagoan Project (Recommended)": "jagoanproject:node_20",
+        "Node.js 22 - Jagoan Project (LTS)": "jagoanproject:node_22",
+        "Node.js 18 - Jagoan Project": "jagoanproject:node_18",
+        "Node.js 24 - Jagoan Project": "jagoanproject:node_24",
+        "Debian 12 Universal - Jagoan Project": "jagoanproject:debian12_universal"
     },
     "file_denylist": [],
     "startup": "if [ -f package.json ] || [ -n \"${STARTUP_CMD}\" ]; then exec ${STARTUP_CMD:-npm start}; else /bin/bash; fi",
