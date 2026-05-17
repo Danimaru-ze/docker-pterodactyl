@@ -42,7 +42,7 @@ if [ "${XVFB_ENABLE:-false}" = "true" ] || [ "${XVFB_ENABLE:-0}" = "1" ]; then
     fi
 fi
 
-# --- AstraHost Smart Startup Logic ---
+# --- Jagoan Project Smart Startup Logic ---
 if [ -f package.json ]; then
     if [ ! -d node_modules ] || [ package.json -nt node_modules ]; then
         echo -e "\n\e[1;36m[DEPENDENCY CHECK]\e[0m Dependencies not found or outdated."
@@ -61,11 +61,11 @@ fi
 
 STARTUP=${STARTUP:-/bin/bash -li}
 
-# --- AstraHost Startup Command Auto-Fixer ---
+# --- Jagoan Project Startup Command Auto-Fixer ---
 # Jika mendeteksi command lama yang panjang atau mengandung error {{STARTUP_CMD}} dari panel,
 # kita akan otomatis me-replace-nya di dalam Docker tanpa perlu ubah config panel satu-satu.
 if [[ "$STARTUP" == *"{{STARTUP_CMD}}"* ]] || [[ "$STARTUP" == *"npm install"* && "$STARTUP" == *"AUTO_UPDATE"* ]]; then
-    echo -e "\e[1;33m[ASTRAHOST]\e[0m Mendeteksi Startup Command usang. Menerapkan Auto-Fix..."
+    echo -e "\e[1;33m[JAGOAN PROJECT]\e[0m Mendeteksi Startup Command usang. Menerapkan Auto-Fix..."
     STARTUP="if [ -f package.json ] || [ -n \"\${STARTUP_CMD}\" ]; then exec \${STARTUP_CMD:-npm start}; else /bin/bash; fi"
 fi
 # --------------------------------------------
@@ -74,16 +74,16 @@ if [ -x /usr/local/bin/astrahost-banner ]; then
     /usr/local/bin/astrahost-banner
 fi
 
-printf "\033[1;35mASTRAHOST\033[0m \033[1;33mStarting WhatsApp Bot...\n\033[0m"
+printf "\033[1;35mJAGOAN PROJECT\033[0m \033[1;33mStarting Bot...\n\033[0m"
 printf "\033[1;32mCMD:\033[0m %s\n\n" "$STARTUP"
 
-# --- AstraHost Fast-Kill Wrapper ---
+# --- Jagoan Project Fast-Kill Wrapper ---
 # Mencegah bot bandel (zombie process) menyangkut saat tombol Stop ditekan
 set -m
 /bin/bash -lc "$STARTUP" &
 MAIN_PID=$!
 
-trap "echo -e '\n\e[1;33m[ASTRAHOST]\e[0m Menerima perintah Stop. Menunggu bot mati dengan tenang (Max 5 detik)...'; kill -SIGINT -$MAIN_PID 2>/dev/null; for i in {1..5}; do kill -0 \$MAIN_PID 2>/dev/null || exit 0; sleep 1; done; echo -e '\e[1;31m[ASTRAHOST]\e[0m Memaksa mati (Force Kill) bot yang bandel...'; kill -9 -$MAIN_PID 2>/dev/null; exit 0" SIGINT SIGTERM
+trap "echo -e '\n\e[1;33m[JAGOAN PROJECT]\e[0m Menerima perintah Stop. Menunggu bot mati dengan tenang (Max 3 detik)...'; kill -SIGINT -$MAIN_PID 2>/dev/null; for i in {1..3}; do kill -0 \$MAIN_PID 2>/dev/null || exit 0; sleep 1; done; echo -e '\e[1;31m[JAGOAN PROJECT]\e[0m Memaksa mati (Force Kill) bot yang bandel...'; kill -9 -$MAIN_PID 2>/dev/null; exit 0" SIGINT SIGTERM
 
 wait $MAIN_PID
 exit $?

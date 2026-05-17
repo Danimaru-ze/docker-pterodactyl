@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-host_name="astrahost"
+host_name="jagoan-project"
 kernel="$(uname -r)"
 ips="$(hostname -I 2>/dev/null | xargs || true)"
 ips="${ips:-127.0.0.1}"
@@ -120,9 +120,9 @@ print_logo() {
     if command -v figlet >/dev/null 2>&1; then
         while IFS= read -r line; do
             printf "%b%s%b\n" "$mag" "$line" "$reset"
-        done < <(figlet -f small -w "$term_cols" "ASTRAHOST")
+        done < <(figlet -f small -w "$term_cols" "JAGOAN PROJECT")
     else
-        printf "%bASTRAHOST%b\n" "$mag" "$reset"
+        printf "%bJAGOAN PROJECT%b\n" "$mag" "$reset"
     fi
 }
 

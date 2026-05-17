@@ -1,4 +1,4 @@
-FROM        --platform=$TARGETOS/$TARGETARCH node:25-bookworm-slim
+FROM --platform=$TARGETOS/$TARGETARCH node:25-bookworm-slim
 LABEL author="danimaru-ze" maintainer="custom@pterodactyl.io"
 
 RUN useradd -m -d /home/container container
@@ -6,59 +6,15 @@ STOPSIGNAL SIGINT
 
 RUN apt update \
     && apt -y install \
-        ffmpeg \
-        iproute2 \
-        git \
-        sqlite3 \
-        libsqlite3-dev \
-        python3 \
-        python3-dev \
-        ca-certificates \
-        dnsutils \
-        tzdata \
-        zip \
-        tar \
-        curl \
-        build-essential \
-        libtool \
-        iputils-ping \
-        libnss3 \
-        tini \
-        gnupg \
-        wget \
-        imagemagick \
-        libcairo2-dev \
-        libpango1.0-dev \
-        libjpeg-dev \
-        libgif-dev \
-        librsvg2-dev \
-        chromium \
-        libx11-6 \
-        libx11-xcb1 \
-        libxcb1 \
-        libxcomposite1 \
-        libxcursor1 \
-        libxdamage1 \
-        libxext6 \
-        libxfixes3 \
-        libxi6 \
-        libxrandr2 \
-        libxrender1 \
-        libxss1 \
-        libxtst6 \
-        fonts-liberation \
-        libappindicator3-1 \
-        libasound2 \
-        libatk-bridge2.0-0 \
-        libatk1.0-0 \
-        libcups2 \
-        libdbus-1-3 \
-        libdrm2 \
-        libgbm1 \
-        libgtk-3-0 \
-        libnspr4 \
-        libnss3 \
-        libxshmfence1 \
+        ffmpeg iproute2 git sqlite3 libsqlite3-dev python3 python3-dev \
+        ca-certificates dnsutils tzdata zip tar curl build-essential libtool \
+        iputils-ping libnss3 tini gnupg wget imagemagick libcairo2-dev \
+        libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev chromium \
+        libx11-6 libx11-xcb1 libxcb1 libxcomposite1 libxcursor1 libxdamage1 \
+        libxext6 libxfixes3 libxi6 libxrandr2 libxrender1 libxss1 libxtst6 \
+        fonts-liberation libappindicator3-1 libasound2 libatk-bridge2.0-0 \
+        libatk1.0-0 libcups2 libdbus-1-3 libdrm2 libgbm1 libgtk-3-0 \
+        libnspr4 libnss3 libxshmfence1 \
     && rm -rf /var/lib/apt/lists/*
 
 RUN mkdir -p --mode=0755 /usr/share/keyrings \
@@ -79,10 +35,8 @@ WORKDIR /home/container
 COPY --chown=container:container ./universal/common/entrypoint.sh /entrypoint.sh
 COPY --chown=container:container ./universal/common/astrahost-banner.sh /usr/local/bin/astrahost-banner
 COPY --chown=container:container ./universal/common/astrahost-shell.sh /etc/profile.d/astrahost-shell.sh
+
 RUN chmod +x /entrypoint.sh /usr/local/bin/astrahost-banner /etc/profile.d/astrahost-shell.sh
 
 ENTRYPOINT ["/usr/bin/tini", "-g", "--"]
 CMD ["/entrypoint.sh"]
-
-
-

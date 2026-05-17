@@ -1,0 +1,17 @@
+# Paksa semua file teks pakai LF (Unix) - krusial untuk Docker/Shell
+* text=auto eol=lf
+
+# Dockerfile selalu LF
+Dockerfile eol=lf
+*.sh eol=lf
+
+# File teks biasa
+*.md text eol=lf
+*.json text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+
+# File binary tidak diubah
+*.png binary
+*.jpg binary
+*.gif binary

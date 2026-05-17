@@ -1,36 +1,50 @@
 #!/bin/bash
 
-# AstraHost Sultan Build Script
-# Digunakan untuk membangun koleksi Node.js lengkap (18-25) dan Universal Ubuntu 24
+# Jagoan Project - Sultan Build Script
+# Digunakan untuk membangun koleksi Node.js lengkap (18-25) dan Universal images
 
 GREEN='\033[0;32m'
 BLUE='\033[0;34m'
 YELLOW='\033[1;33m'
+RED='\033[0;31m'
 NC='\033[0m' # No Color
 
 echo -e "${BLUE}=======================================${NC}"
-echo -e "${GREEN}      ASTRAHOST - SULTAN BUILD         ${NC}"
+echo -e "${GREEN}    JAGOAN PROJECT - SULTAN BUILD      ${NC}"
 echo -e "${BLUE}=======================================${NC}"
 
 # Aktifkan BuildKit untuk kecepatan Sultan
 export DOCKER_BUILDKIT=1
 
+REGISTRY="${REGISTRY:-ghcr.io/danimaru-ze/docker-pterodactyl}"
+
 # 1. Build Node.js LTS (Hanya versi stabil yang dibutuhkan)
-echo -e "${YELLOW}Building Node.js LTS versions (18, 20, 22, 24)...${NC}"
+echo -e "\n${YELLOW}[1/3] Building Node.js LTS versions (18, 20, 22, 24)...${NC}"
 for version in 18 20 22 24; do
     echo -e "--- Building node_$version ---"
-    docker build -t astrahost:node_$version -f nodejs/$version/Dockerfile .
+    docker build -t "${REGISTRY}:node_${version}" -f nodejs/$version/Dockerfile . \
+        && echo -e "${GREEN}✓ node_${version} selesai${NC}" \
+        || echo -e "${RED}✗ node_${version} GAGAL${NC}"
 done
 
-# 2. Build Universal Ubuntu 24
-echo -e "${YELLOW}Building Universal Ubuntu 24...${NC}"
-docker build -t astrahost:ubuntu24_universal -f universal/ubuntu/24.04/Dockerfile .
+# 2. Build Universal Debian 12 (Recommended untuk VPS Debian)
+echo -e "\n${YELLOW}[2/3] Building Universal Debian 12 (Recommended)...${NC}"
+docker build -t "${REGISTRY}:debian12_universal" -f universal/debian/12/Dockerfile . \
+    && echo -e "${GREEN}✓ debian12_universal selesai${NC}" \
+    || echo -e "${RED}✗ debian12_universal GAGAL${NC}"
 
-echo -e "${BLUE}=======================================${NC}"
+# 3. Build Universal Ubuntu 24
+echo -e "\n${YELLOW}[3/3] Building Universal Ubuntu 24...${NC}"
+docker build -t "${REGISTRY}:ubuntu24_universal" -f universal/ubuntu/24.04/Dockerfile . \
+    && echo -e "${GREEN}✓ ubuntu24_universal selesai${NC}" \
+    || echo -e "${RED}✗ ubuntu24_universal GAGAL${NC}"
+
+echo -e "\n${BLUE}=======================================${NC}"
 echo -e "${GREEN}      SULTAN BUILD SELESAI!          ${NC}"
 echo -e "${BLUE}=======================================${NC}"
 echo -e "Silakan gunakan image ini di Pterodactyl Panel:"
-echo -e "- astrahost:node_18 s/d astrahost:node_25"
-echo -e "- astrahost:ubuntu24_universal (Overpower)"
+echo -e "  ${GREEN}Node.js:${NC}  ${REGISTRY}:node_18 s/d node_24"
+echo -e "  ${GREEN}Debian:${NC}   ${REGISTRY}:debian12_universal  (Direkomendasikan)"
+echo -e "  ${GREEN}Ubuntu:${NC}   ${REGISTRY}:ubuntu24_universal  (Overpower)"
 echo -e ""
 echo -e "${YELLOW}CATATAN:${NC} Jangan lupa Reinstall Server di panel setelah ganti image!"

@@ -1,0 +1,255 @@
+{
+    "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": null
+    },
+    "name": "⚡ AstraHost PM2 [Pro]",
+    "author": "danysetiyawan50@gmail.com",
+    "description": "Egg profesional berbasis PM2 Process Manager untuk WhatsApp Bot & Node.js Apps. Fitur: Auto-Restart, Health Monitoring, Cluster Mode, Log Management, Graceful Reload, Memory Limit Guard, ecosystem.config.js support, dan Zero-Downtime Deployment. Cocok untuk user sepuh yang butuh kontrol penuh atas proses bot mereka.",
+    "features": ["eula"],
+    "docker_images": {
+        "🟢 Node.js 20 LTS + PM2 (Recommended)": "astrahost:node_20",
+        "🔵 Node.js 22 LTS + PM2": "astrahost:node_22",
+        "🟡 Node.js 18 LTS + PM2 (Legacy)": "astrahost:node_18",
+        "🟠 Node.js 24 Stable + PM2": "astrahost:node_24",
+        "🔴 Ubuntu 24.04 Universal + PM2": "astrahost:ubuntu24_universal"
+    },
+    "file_denylist": [],
+    "startup": "command -v pm2 &>/dev/null || npm install -g pm2@latest --silent; cd /home/container; if [ '${AUTO_UPDATE:-0}' = '1' ] && [ -d .git ]; then git pull --rebase --autostash 2>/dev/null || true; fi; if [ -f package.json ] && ([ ! -d node_modules ] || [ package.json -nt node_modules ]); then npm install --production --prefer-offline; fi; if [ -n '${NODE_PACKAGES:-}' ]; then npm install ${NODE_PACKAGES} --silent; fi; mkdir -p logs; if [ '${USE_ECOSYSTEM:-1}' = '1' ] && [ -f ecosystem.config.js ]; then exec pm2-runtime start ecosystem.config.js --env ${NODE_ENV:-production} --no-daemon; elif [ '${USE_ECOSYSTEM:-1}' = '1' ] && [ -f ecosystem.config.cjs ]; then exec pm2-runtime start ecosystem.config.cjs --env ${NODE_ENV:-production} --no-daemon; else exec pm2-runtime start ${PM2_SCRIPT:-index.js} --name ${PM2_APP_NAME:-bot} --no-daemon -i ${PM2_INSTANCES:-1} --exec-mode ${PM2_EXEC_MODE:-fork} --max-memory-restart ${MAX_MEMORY:-512}M --max-restarts ${MAX_RESTARTS:-10} --restart-delay ${RESTART_DELAY:-3000} --min-uptime ${MIN_UPTIME:-5s} --kill-timeout ${KILL_TIMEOUT:-5000} --log ./logs/pm2-out.log --error ./logs/pm2-err.log --log-date-format 'YYYY-MM-DD HH:mm:ss' --merge-logs; fi",
+    "config": {
+        "files": "{}",
+        "startup": "{\"done\": [\"PM2 Daemon\", \"online\", \"✓\", \"started\", \"Bot is ready\", \"Connected\", \"QR\", \"listening\", \"App started\", \"[PM2]\", \"DaemonAlreadyRunning\"]}",
+        "logs": "{}",
+        "stop": "^C"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!/bin/bash\n\n# ============================================================\n# AstraHost PM2 Egg - Installation Script\n# Professional-grade setup dengan full PM2 support\n# ============================================================\n\nset -e\n\nPRINT_INFO()  { echo -e \"\\e[1;36m[INFO]\\e[0m $1\"; }\nPRINT_OK()    { echo -e \"\\e[1;32m[OK]\\e[0m $1\"; }\nPRINT_WARN()  { echo -e \"\\e[1;33m[WARN]\\e[0m $1\"; }\nPRINT_ERR()   { echo -e \"\\e[1;31m[ERR]\\e[0m $1\"; }\nPRINT_STEP()  { echo -e \"\\e[1;35m[STEP]\\e[0m $1\"; }\n\necho \"\"\necho -e \"\\e[1;35m╔══════════════════════════════════════════════════════╗\\e[0m\"\necho -e \"\\e[1;35m║        AstraHost PM2 Pro - Installation              ║\\e[0m\"\necho -e \"\\e[1;35m╚══════════════════════════════════════════════════════╝\\e[0m\"\necho \"\"\n\n# Update & install core dependencies\nPRINT_STEP \"Installing system dependencies...\"\napt-get update -y -qq\napt-get install -y -qq git curl wget jq ca-certificates\nPRINT_OK \"System dependencies installed.\"\n\n# Install PM2 globally\nPRINT_STEP \"Installing PM2 globally...\"\nnpm install -g pm2@latest --silent\nPM2_VER=$(pm2 --version)\nPRINT_OK \"PM2 v${PM2_VER} installed successfully.\"\n\ncd /mnt/server || exit 1\n\n# Clone repository jika bukan user upload mode\nif [ \"${USER_UPLOAD}\" != \"true\" ]; then\n    if [ -z \"${GIT_ADDRESS}\" ]; then\n        PRINT_WARN \"GIT_ADDRESS kosong, melewati proses clone...\"\n    else\n        PRINT_STEP \"Cloning repository from ${GIT_ADDRESS}...\"\n        if [ -n \"${USERNAME}\" ] && [ -n \"${ACCESS_TOKEN}\" ]; then\n            git clone --depth=${GIT_DEPTH:-1} \"https://${USERNAME}:${ACCESS_TOKEN}@${GIT_ADDRESS#https://}\" .\n        else\n            git clone --depth=${GIT_DEPTH:-1} \"${GIT_ADDRESS}\" .\n        fi\n        PRINT_OK \"Repository cloned successfully.\"\n\n        # Checkout branch tertentu jika ada\n        if [ -n \"${GIT_BRANCH}\" ]; then\n            PRINT_STEP \"Checking out branch: ${GIT_BRANCH}...\"\n            git checkout \"${GIT_BRANCH}\" || git checkout -b \"${GIT_BRANCH}\"\n            PRINT_OK \"Branch ${GIT_BRANCH} checked out.\"\n        fi\n    fi\nelse\n    PRINT_INFO \"User Upload Mode aktif, melewati clone.\"\nfi\n\n# Install Node.js dependencies\nif [ -f package.json ]; then\n    PRINT_STEP \"Installing npm dependencies...\"\n    if [ \"${NODE_ENV:-production}\" = \"development\" ]; then\n        npm install\n    else\n        npm install --production --prefer-offline\n    fi\n    PRINT_OK \"npm dependencies installed.\"\nfi\n\n# Install package tambahan jika ada\nif [ -n \"${NODE_PACKAGES}\" ]; then\n    PRINT_STEP \"Installing extra packages: ${NODE_PACKAGES}\"\n    npm install ${NODE_PACKAGES}\n    PRINT_OK \"Extra packages installed.\"\nfi\n\n# Buat ecosystem.config.js default jika belum ada\nif [ ! -f ecosystem.config.js ] && [ ! -f ecosystem.config.cjs ]; then\n    PRINT_STEP \"Generating default ecosystem.config.js...\"\n\n    # Deteksi main file\n    MAIN_FILE=$(node -e \"try{const p=require('./package.json');console.log(p.main||'index.js')}catch(e){console.log('index.js')}\" 2>/dev/null || echo \"index.js\")\n    APP_NAME=$(node -e \"try{const p=require('./package.json');console.log(p.name||'app')}catch(e){console.log('app')}\" 2>/dev/null || echo \"app\")\n\n    cat > ecosystem.config.js << ECOSYSTEM_EOF\n// ============================================================\n// PM2 Ecosystem Configuration - Generated by AstraHost\n// Docs: https://pm2.keymetrics.io/docs/usage/application-declaration/\n// ============================================================\n\nmodule.exports = {\n  apps: [\n    {\n      // --- Identity ---\n      name: '${APP_NAME}',\n      script: '${MAIN_FILE}',\n\n      // --- Instances & Clustering ---\n      instances: 1,            // 'max' untuk cluster mode (multi-core)\n      exec_mode: 'fork',       // 'cluster' untuk load balancing multi-instance\n\n      // --- Auto Restart ---\n      autorestart: true,\n      watch: false,            // set true untuk watch file changes (dev only)\n      ignore_watch: ['node_modules', 'logs', 'sessions', 'auth'],\n\n      // --- Memory Management ---\n      max_memory_restart: '${MAX_MEMORY:-512}M',\n\n      // --- Restart Strategy ---\n      restart_delay: ${RESTART_DELAY:-3000},     // delay sebelum restart (ms)\n      max_restarts: ${MAX_RESTARTS:-10},          // max restart dalam window\n      min_uptime: '${MIN_UPTIME:-5s}',           // min uptime agar dianggap stable\n\n      // --- Environment ---\n      env: {\n        NODE_ENV: '${NODE_ENV:-production}',\n        TZ: '${TZ:-Asia/Jakarta}',\n      },\n      env_development: {\n        NODE_ENV: 'development',\n        DEBUG: '*',\n      },\n\n      // --- Logging ---\n      out_file: './logs/pm2-out.log',\n      error_file: './logs/pm2-err.log',\n      log_date_format: 'YYYY-MM-DD HH:mm:ss Z',\n      merge_logs: true,\n\n      // --- Graceful Shutdown ---\n      kill_timeout: ${KILL_TIMEOUT:-5000},      // waktu tunggu sebelum force kill (ms)\n      listen_timeout: 5000,\n      shutdown_with_message: false,\n    }\n  ]\n};\nECOSYSTEM_EOF\n    PRINT_OK \"ecosystem.config.js generated at /mnt/server/ecosystem.config.js\"\nelse\n    PRINT_INFO \"ecosystem.config.js already exists, skipping generation.\"\nfi\n\n# Buat folder logs\nmkdir -p /mnt/server/logs\nPRINT_OK \"Log directory created at /mnt/server/logs\"\n\nPRINT_OK \"\"\necho -e \"\\e[1;32m╔══════════════════════════════════════════════════════╗\\e[0m\"\necho -e \"\\e[1;32m║          Installation Completed Successfully!        ║\\e[0m\"\necho -e \"\\e[1;32m╚══════════════════════════════════════════════════════╝\\e[0m\"\necho \"\"\nexit 0",
+            "container": "node:20-bookworm-slim",
+            "entrypoint": "bash"
+        }
+    },
+    "variables": [
+        {
+            "name": "📦 Git Repository URL",
+            "description": "URL repository Git. Contoh: https://github.com/user/bot.git | Kosongkan jika User Upload Mode = true",
+            "env_variable": "GIT_ADDRESS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+        },
+        {
+            "name": "🌿 Git Branch",
+            "description": "Branch yang akan di-checkout. Contoh: main, master, dev. Kosongkan untuk default.",
+            "env_variable": "GIT_BRANCH",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+        },
+        {
+            "name": "🔢 Git Clone Depth",
+            "description": "Depth shallow clone. 1 = hanya commit terbaru (lebih cepat). 0 = full history.",
+            "env_variable": "GIT_DEPTH",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|min:0",
+            "field_type": "text"
+        },
+        {
+            "name": "👤 Git Username",
+            "description": "Username GitHub/GitLab untuk private repository (opsional).",
+            "env_variable": "USERNAME",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+        },
+        {
+            "name": "🔑 Git Access Token",
+            "description": "Personal Access Token untuk private repository (opsional). Jangan bagikan ke siapapun!",
+            "env_variable": "ACCESS_TOKEN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "nullable|string",
+            "field_type": "text"
+        },
+        {
+            "name": "📤 User Upload Mode",
+            "description": "true = upload file manual tanpa clone git | false = clone dari GIT_ADDRESS",
+            "env_variable": "USER_UPLOAD",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|in:true,false",
+            "field_type": "text"
+        },
+        {
+            "name": "⚙️ PM2 App Name",
+            "description": "Nama proses PM2. Gunakan untuk pm2 logs, pm2 restart, dll. Hanya huruf, angka, dan dash.",
+            "env_variable": "PM2_APP_NAME",
+            "default_value": "bot",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|alpha_dash",
+            "field_type": "text"
+        },
+        {
+            "name": "📄 PM2 Startup Script / Entry Point",
+            "description": "File utama untuk dijalankan. Contoh: index.js, src/bot.js, dist/app.js. Diabaikan jika ecosystem.config.js ada.",
+            "env_variable": "PM2_SCRIPT",
+            "default_value": "index.js",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+        },
+        {
+            "name": "🏗️ PM2 Exec Mode",
+            "description": "fork = single process (default) | cluster = multi-instance load balancing (butuh kode cluster-safe)",
+            "env_variable": "PM2_EXEC_MODE",
+            "default_value": "fork",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|in:fork,cluster",
+            "field_type": "text"
+        },
+        {
+            "name": "🔢 PM2 Instances",
+            "description": "Jumlah instance (hanya efektif di cluster mode). 1 = single | max = semua CPU core",
+            "env_variable": "PM2_INSTANCES",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+        },
+        {
+            "name": "🧠 Max Memory Restart (MB)",
+            "description": "Bot akan auto-restart jika RAM melewati batas ini. Contoh: 256 = 256MB, 512 = 512MB",
+            "env_variable": "MAX_MEMORY",
+            "default_value": "512",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|min:64|max:4096",
+            "field_type": "text"
+        },
+        {
+            "name": "🔄 Max Restarts",
+            "description": "Jumlah maksimum restart sebelum PM2 menyerah (dalam 60 detik). 0 = unlimited",
+            "env_variable": "MAX_RESTARTS",
+            "default_value": "10",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|min:0",
+            "field_type": "text"
+        },
+        {
+            "name": "⏱️ Restart Delay (ms)",
+            "description": "Delay sebelum PM2 me-restart proses yang crash (milidetik). Default: 3000 = 3 detik",
+            "env_variable": "RESTART_DELAY",
+            "default_value": "3000",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|min:0",
+            "field_type": "text"
+        },
+        {
+            "name": "⏳ Min Uptime (stable threshold)",
+            "description": "Durasi minimum proses harus berjalan agar dianggap stable. Contoh: 5s, 10s, 1m",
+            "env_variable": "MIN_UPTIME",
+            "default_value": "5s",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+        },
+        {
+            "name": "🔪 Kill Timeout (ms)",
+            "description": "Waktu tunggu graceful shutdown sebelum force kill. Default: 5000 = 5 detik",
+            "env_variable": "KILL_TIMEOUT",
+            "default_value": "5000",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|min:1000",
+            "field_type": "text"
+        },
+        {
+            "name": "🌍 Node Environment",
+            "description": "Mode environment Node.js. production = optimal | development = debug mode (verbose log)",
+            "env_variable": "NODE_ENV",
+            "default_value": "production",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|in:production,development",
+            "field_type": "text"
+        },
+        {
+            "name": "🕐 Timezone",
+            "description": "Timezone untuk proses. Contoh: Asia/Jakarta, Asia/Singapore, UTC",
+            "env_variable": "TZ",
+            "default_value": "Asia/Jakarta",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+        },
+        {
+            "name": "📦 Extra npm Packages",
+            "description": "Package npm tambahan yang diinstall saat server start. Contoh: ffmpeg-static sharp canvas",
+            "env_variable": "NODE_PACKAGES",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+        },
+        {
+            "name": "🔃 Auto Update via Git",
+            "description": "1 = git pull + npm install otomatis saat server start | 0 = nonaktif",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|in:0,1",
+            "field_type": "text"
+        },
+        {
+            "name": "📺 Enable XVFB (Headless Display)",
+            "description": "1 = aktifkan virtual display untuk Puppeteer/Chromium | 0 = nonaktif",
+            "env_variable": "XVFB_ENABLE",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|in:0,1",
+            "field_type": "text"
+        },
+        {
+            "name": "📜 PM2 Log Rotation (lines)",
+            "description": "Jumlah baris maksimum per log file sebelum dirotasi. 0 = nonaktif. Contoh: 5000",
+            "env_variable": "PM2_LOG_MAX_LINES",
+            "default_value": "5000",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|min:0",
+            "field_type": "text"
+        },
+        {
+            "name": "🔗 Use ecosystem.config.js",
+            "description": "1 = gunakan ecosystem.config.js (lebih powerful) | 0 = gunakan PM2_SCRIPT langsung",
+            "env_variable": "USE_ECOSYSTEM",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|in:0,1",
+            "field_type": "text"
+        }
+    ]
+}
