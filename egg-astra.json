@@ -4,36 +4,46 @@
         "version": "PTDL_v2",
         "update_url": null
     },
-    "name": "Astra WhatsApp Bot",
+    "name": "Jagoan Project - Bot",
     "author": "danysetiyawan50@gmail.com",
-    "description": "Egg WhatsApp Bot dengan multi Node version + XVFB + Auto Update",
+    "description": "Egg universal untuk bot Node.js (WhatsApp, Discord, Telegram, dll). Support clone Git private/public, auto install dependencies, dan auto update.",
     "features": [],
     "docker_images": {
-        "Node.js 20 (Recommended for WA Bot)": "astrahost:node_20",
-        "Ubuntu 24.04 (Universal Image)": "astrahost:ubuntu24_universal",
-        "Node.js 24 (Stable)": "astrahost:node_24",
-        "Node.js 22 (LTS)": "astrahost:node_22",
-        "Node.js 18 (LTS)": "astrahost:node_18"
+        "Node.js 20 - Jagoan Project (Recommended)": "ghcr.io/danimaru-ze/docker-pterodactyl:node_20",
+        "Node.js 22 - Jagoan Project (LTS)": "ghcr.io/danimaru-ze/docker-pterodactyl:node_22",
+        "Node.js 18 - Jagoan Project": "ghcr.io/danimaru-ze/docker-pterodactyl:node_18",
+        "Node.js 24 - Jagoan Project": "ghcr.io/danimaru-ze/docker-pterodactyl:node_24",
+        "Debian 12 Universal - Jagoan Project": "ghcr.io/danimaru-ze/docker-pterodactyl:debian12_universal"
     },
     "file_denylist": [],
     "startup": "if [ -f package.json ] || [ -n \"${STARTUP_CMD}\" ]; then exec ${STARTUP_CMD:-npm start}; else /bin/bash; fi",
     "config": {
         "files": "{}",
-        "startup": "{\"done\": [\"Server started\", \"Bot is ready\", \"Connected\", \"QR\", \"listening\"]}",
+        "startup": "{\"done\": [\"Server started\", \"Bot is ready\", \"Connected\", \"QR\", \"listening\", \"online\", \"started\", \"ready\"]}",
         "logs": "{}",
         "stop": "^C"
     },
     "scripts": {
         "installation": {
-            "script": "#!/bin/bash\n\ncd /mnt/server || exit 1\n\necho \"[INFO] Starting installation...\"\n\nif [ \"${USER_UPLOAD}\" != \"true\" ]; then\n    if [ -z \"${GIT_ADDRESS}\" ]; then\n        echo \"[INFO] GIT_ADDRESS kosong, melewati proses clone...\"\n    else\n        echo \"[INFO] Cloning repository...\"\n        if [ ! -z \"${USERNAME}\" ] && [ ! -z \"${ACCESS_TOKEN}\" ]; then\n            git clone https://${USERNAME}:${ACCESS_TOKEN}@${GIT_ADDRESS#https://} .\n        else\n            git clone ${GIT_ADDRESS} .\n        fi\n    fi\nfi\n\nif [ -f package.json ]; then\n    echo \"[INFO] Installing dependencies...\"\n    npm install --production\nfi\n\necho \"[INFO] Installation completed\"\nexit 0",
+            "script": "#!/bin/bash\n\ncd /mnt/server || exit 1\n\necho \"[JAGOAN PROJECT] Memulai instalasi...\"\n\n# Clone repository jika GIT_ADDRESS diisi\nif [ -n \"${GIT_ADDRESS}\" ]; then\n    echo \"[INFO] Cloning repository: ${GIT_ADDRESS}\"\n    if [ -n \"${USERNAME}\" ] && [ -n \"${ACCESS_TOKEN}\" ]; then\n        git clone https://${USERNAME}:${ACCESS_TOKEN}@${GIT_ADDRESS#https://} .\n    else\n        git clone ${GIT_ADDRESS} .\n    fi\nelse\n    echo \"[INFO] GIT_ADDRESS kosong. Mode upload manual - skip clone.\"\nfi\n\n# Install dependencies jika ada package.json\nif [ -f package.json ]; then\n    echo \"[INFO] Menginstall dependencies...\"\n    npm install --production\n    echo \"[INFO] Dependencies berhasil diinstall!\"\nfi\n\necho \"[JAGOAN PROJECT] Instalasi selesai!\"\nexit 0",
             "container": "node:20-bookworm-slim",
             "entrypoint": "bash"
         }
     },
     "variables": [
         {
+            "name": "Startup Command",
+            "description": "Perintah untuk menjalankan bot. Contoh: npm start | node index.js | bun start",
+            "env_variable": "STARTUP_CMD",
+            "default_value": "npm start",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+        },
+        {
             "name": "Git Repository URL",
-            "description": "URL repository Git",
+            "description": "URL repo Git. Kosongkan jika upload file manual. Contoh: https://github.com/user/bot.git",
             "env_variable": "GIT_ADDRESS",
             "default_value": "",
             "user_viewable": true,
@@ -43,7 +53,7 @@
         },
         {
             "name": "Git Username",
-            "description": "Username Git (opsional)",
+            "description": "Username GitHub/GitLab (isi jika repo private, kosongkan jika public)",
             "env_variable": "USERNAME",
             "default_value": "",
             "user_viewable": true,
@@ -53,62 +63,22 @@
         },
         {
             "name": "Git Access Token",
-            "description": "Token Git (opsional)",
+            "description": "Personal Access Token Git (isi jika repo private, kosongkan jika public)",
             "env_variable": "ACCESS_TOKEN",
             "default_value": "",
-            "user_viewable": true,
+            "user_viewable": false,
             "user_editable": true,
             "rules": "nullable|string",
-            "field_type": "text"
-        },
-        {
-            "name": "Startup Command",
-            "description": "Contoh: npm start",
-            "env_variable": "STARTUP_CMD",
-            "default_value": "npm start",
-            "user_viewable": true,
-            "user_editable": true,
-            "rules": "required|string",
-            "field_type": "text"
-        },
-        {
-            "name": "Extra Node Packages",
-            "description": "Contoh: ffmpeg-static sharp",
-            "env_variable": "NODE_PACKAGES",
-            "default_value": "",
-            "user_viewable": true,
-            "user_editable": true,
-            "rules": "nullable|string",
-            "field_type": "text"
-        },
-        {
-            "name": "Enable XVFB",
-            "description": "1 = aktif, 0 = nonaktif",
-            "env_variable": "XVFB_ENABLE",
-            "default_value": "0",
-            "user_viewable": true,
-            "user_editable": true,
-            "rules": "required|in:0,1",
             "field_type": "text"
         },
         {
             "name": "Auto Update",
-            "description": "1 = aktif, 0 = nonaktif",
+            "description": "Otomatis git pull setiap kali server start. 1 = aktif, 0 = nonaktif",
             "env_variable": "AUTO_UPDATE",
             "default_value": "0",
             "user_viewable": true,
             "user_editable": true,
             "rules": "required|in:0,1",
-            "field_type": "text"
-        },
-        {
-            "name": "User Upload Mode",
-            "description": "true = upload manual, false = clone git",
-            "env_variable": "USER_UPLOAD",
-            "default_value": "false",
-            "user_viewable": true,
-            "user_editable": true,
-            "rules": "required|in:true,false",
             "field_type": "text"
         }
     ]
