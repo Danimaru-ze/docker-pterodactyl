@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Jagoan Project - Sultan Build Script
-# Digunakan untuk membangun koleksi Node.js lengkap (18-25) dan Universal images
+# Membangun koleksi Node.js LTS + Universal Debian 12
 
 GREEN='\033[0;32m'
 BLUE='\033[0;34m'
@@ -18,33 +18,26 @@ export DOCKER_BUILDKIT=1
 
 REGISTRY="${REGISTRY:-ghcr.io/danimaru-ze/docker-pterodactyl}"
 
-# 1. Build Node.js LTS (Hanya versi stabil yang dibutuhkan)
-echo -e "\n${YELLOW}[1/3] Building Node.js LTS versions (18, 20, 22, 24)...${NC}"
+# 1. Build Node.js LTS
+echo -e "\n${YELLOW}[1/2] Building Node.js LTS versions (18, 20, 22, 24)...${NC}"
 for version in 18 20 22 24; do
-    echo -e "--- Building node_$version ---"
+    echo -e "--- Building node_${version} ---"
     docker build -t "${REGISTRY}:node_${version}" -f nodejs/$version/Dockerfile . \
         && echo -e "${GREEN}✓ node_${version} selesai${NC}" \
         || echo -e "${RED}✗ node_${version} GAGAL${NC}"
 done
 
-# 2. Build Universal Debian 12 (Recommended untuk VPS Debian)
-echo -e "\n${YELLOW}[2/3] Building Universal Debian 12 (Recommended)...${NC}"
+# 2. Build Universal Debian 12
+echo -e "\n${YELLOW}[2/2] Building Universal Debian 12...${NC}"
 docker build -t "${REGISTRY}:debian12_universal" -f universal/debian/12/Dockerfile . \
     && echo -e "${GREEN}✓ debian12_universal selesai${NC}" \
     || echo -e "${RED}✗ debian12_universal GAGAL${NC}"
-
-# 3. Build Universal Ubuntu 24
-echo -e "\n${YELLOW}[3/3] Building Universal Ubuntu 24...${NC}"
-docker build -t "${REGISTRY}:ubuntu24_universal" -f universal/ubuntu/24.04/Dockerfile . \
-    && echo -e "${GREEN}✓ ubuntu24_universal selesai${NC}" \
-    || echo -e "${RED}✗ ubuntu24_universal GAGAL${NC}"
 
 echo -e "\n${BLUE}=======================================${NC}"
 echo -e "${GREEN}      SULTAN BUILD SELESAI!          ${NC}"
 echo -e "${BLUE}=======================================${NC}"
 echo -e "Silakan gunakan image ini di Pterodactyl Panel:"
-echo -e "  ${GREEN}Node.js:${NC}  ${REGISTRY}:node_18 s/d node_24"
+echo -e "  ${GREEN}Node.js:${NC}  ${REGISTRY}:node_18 / node_20 / node_22 / node_24"
 echo -e "  ${GREEN}Debian:${NC}   ${REGISTRY}:debian12_universal  (Direkomendasikan)"
-echo -e "  ${GREEN}Ubuntu:${NC}   ${REGISTRY}:ubuntu24_universal  (Overpower)"
 echo -e ""
 echo -e "${YELLOW}CATATAN:${NC} Jangan lupa Reinstall Server di panel setelah ganti image!"
