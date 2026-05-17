@@ -78,12 +78,27 @@ printf "\033[1;35mJAGOAN PROJECT\033[0m \033[1;33mStarting Bot...\n\033[0m"
 printf "\033[1;32mCMD:\033[0m %s\n\n" "$STARTUP"
 
 # --- Jagoan Project Fast-Kill Wrapper ---
-# Mencegah bot bandel (zombie process) menyangkut saat tombol Stop ditekan
-set -m
+# Tanpa set -m agar bot bisa baca stdin (input nomor WA, dll)
+# Fast-kill tetap berjalan via _cleanup function
+
+_cleanup() {
+    echo -e "\n\e[1;33m[JAGOAN PROJECT]\e[0m Menerima perintah Stop. Menunggu bot mati dengan tenang (Max 3 detik)..."
+    kill -SIGINT "$MAIN_PID" 2>/dev/null || true
+    for i in {1..3}; do
+        kill -0 "$MAIN_PID" 2>/dev/null || exit 0
+        sleep 1
+    done
+    echo -e "\e[1;31m[JAGOAN PROJECT]\e[0m Memaksa mati (Force Kill) bot yang bandel..."
+    kill -9 "$MAIN_PID" 2>/dev/null || true
+    # Bunuh juga seluruh process group untuk zombie cleanup
+    kill -9 -"$MAIN_PID" 2>/dev/null || true
+    exit 0
+}
+
 /bin/bash -lc "$STARTUP" &
 MAIN_PID=$!
 
-trap "echo -e '\n\e[1;33m[JAGOAN PROJECT]\e[0m Menerima perintah Stop. Menunggu bot mati dengan tenang (Max 3 detik)...'; kill -SIGINT -$MAIN_PID 2>/dev/null; for i in {1..3}; do kill -0 \$MAIN_PID 2>/dev/null || exit 0; sleep 1; done; echo -e '\e[1;31m[JAGOAN PROJECT]\e[0m Memaksa mati (Force Kill) bot yang bandel...'; kill -9 -$MAIN_PID 2>/dev/null; exit 0" SIGINT SIGTERM
+trap _cleanup SIGINT SIGTERM
 
 wait $MAIN_PID
 exit $?
